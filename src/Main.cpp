@@ -6,6 +6,8 @@
 #include "Operation.h"
 #include "Network.h"
 
+#include "timer.h"
+
 int DIGIT=10;
 
 int main(int argc, char ** argv){
@@ -100,6 +102,7 @@ int main(int argc, char ** argv){
 		double loss = 0.0;
 		double loss_test = 0.0;
 
+		Timer t;
 		for(int i_img=0;i_img<corpus.n_image;i_img++){
 
 			layer6->operations[0]->groundtruth 
@@ -112,7 +115,9 @@ int main(int argc, char ** argv){
 			network.forward();
 			network.backward();	
 		}
+		std::cout << "Training " << t.elapsed() << " seconds..." << std::endl;
 
+		t.restart();
 		for(int i_img=0;i_img<corpus_test.n_image;i_img++){
 
 			layer6->operations[0]->groundtruth 
@@ -138,6 +143,7 @@ int main(int argc, char ** argv){
 			ncorr_neg[gt] += (gt==imax);
 			loss_test += (gt==imax);
 		}
+		std::cout << "Testing " << t.elapsed() << " seconds..." << std::endl;
 		
 		std::cout << "----TEST----" << loss_test/corpus_test.n_image << std::endl;
 		for(int dig=0;dig<DIGIT;dig++){
