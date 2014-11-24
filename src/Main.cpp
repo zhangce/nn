@@ -115,7 +115,9 @@ int main(int argc, char ** argv){
 			network.forward();
 			network.backward();	
 		}
-		std::cout << "Training " << t.elapsed() << " seconds..." << std::endl;
+		double trainingtime = t.elapsed();
+		std::cout << "Training " << trainingtime << " seconds..." << "  " <<
+			(trainingtime/corpus.n_image) << " seconds/image." << std::endl;
 
 		t.restart();
 		for(int i_img=0;i_img<corpus_test.n_image;i_img++){
@@ -143,7 +145,9 @@ int main(int argc, char ** argv){
 			ncorr_neg[gt] += (gt==imax);
 			loss_test += (gt==imax);
 		}
-		std::cout << "Testing " << t.elapsed() << " seconds..." << std::endl;
+		double testingtime = t.elapsed();
+		std::cout << "Testing " << t.elapsed() << " seconds..." << "  " <<
+			(testingtime/corpus_test.n_image) << " seconds/image." << std::endl;
 		
 		std::cout << "----TEST----" << loss_test/corpus_test.n_image << std::endl;
 		for(int dig=0;dig<DIGIT;dig++){
