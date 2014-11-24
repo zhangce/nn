@@ -1,0 +1,282 @@
+
+class ConvOperation : public Operation{	// THIS SEEMS IN CORRECT
+public:
+
+	void clear_grad(){
+		//for(int r=0;r<nrow_output;r++){
+		//	for(int c=0;c<ncol_output;c++){
+		//		grad[r][c] = 0;
+		//	}
+		//}
+		if(grads[0] != NULL){
+			for(int ir=0;ir<nrow_input;ir++){
+				for(int ic=0;ic<ncol_input;ic++){
+					grads[0][ir][ic] = 0.0;
+				}
+			}
+		}
+	}
+
+	ConvOperation(int nrow_output, int ncol_output, int nrow_input, int ncol_input):
+		Operation(nrow_output, ncol_output, nrow_input, ncol_input){
+	
+		// init weights
+		for(int r=0;r<nrow_conv;r++){
+			for(int c=0;c<ncol_conv;c++){
+				weights[0][r][c] = (drand48()*2-1)/10;
+			}
+		}
+
+	}
+
+	void backward(){
+
+		//assert(grads[0] == NULL);
+
+		//if(grads[0] != NULL){
+		//	for(int ir=0;ir<nrow_input;ir++){
+		//		for(int ic=0;ic<ncol_input;ic++){
+		//			grads[0][ir][ic] = 0.0;
+		//		}
+		//	}
+		//}
+
+
+		/*
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+
+				double cvalue = output[r][c];
+				double cgrad = grad[r][c];
+
+				for(int ir=r;ir<r+nrow_conv;ir++){
+					for(int ic=c;ic<c+ncol_conv;ic++){
+
+						double w = weights[0][ir-r][ic-c];
+						double x = inputs[0][ir][ic];
+
+						double grad_w = (1.0-cvalue*cvalue)*x * cgrad;
+						double grad_x = (1.0-cvalue*cvalue)*w * cgrad;
+
+						weights[0][ir-r][ic-c] = 
+							weights[0][ir-r][ic-c] + STEPSIZE * grad_w;
+
+						if(grads[0] != NULL){
+							grads[0][ir][ic] += grad_x;
+						}
+
+					}
+				}
+			}
+		}
+		*/
+
+	}
+
+	void forward(){
+
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+				double sum = 0.0;
+				for(int ir=r;ir<r+nrow_conv;ir++){
+					for(int ic=c;ic<c+ncol_conv;ic++){
+						sum += weights[0][ir-r][ic-c] * inputs[0][ir][ic];
+					}
+				}
+				output[r][c] = tanh(sum);
+			}
+		}
+
+		/*
+		std::cout << "-------CONV-------" << std::endl;
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+				std::cout << output[r][c] << " ";
+			}
+			std::cout << std::endl;
+		}
+		*/
+	}
+
+};
+
+
+class GaussianOperation : public Operation{
+public:
+
+	int n_input;
+
+	void clear_grad(){
+		//for(int r=0;r<nrow_output;r++){
+		//	for(int c=0;c<ncol_output;c++){
+		//		grad[r][c] = 0;
+		//	}
+		//}
+		for(int i_input=0;i_input<n_input;i_input++){
+			for(int ir=0;ir<nrow_input;ir++){
+				for(int ic=0;ic<ncol_input;ic++){
+					grads[i_input][ir][ic] = 0.0;
+				}
+			}
+		}
+	}
+
+	GaussianOperation(int _n_input, int nrow_output, int ncol_output, int nrow_input, int ncol_input):
+		Operation(nrow_output, ncol_output, nrow_input, ncol_input){
+	
+		n_input = _n_input;
+
+		// init weights
+		for(int i=0;i<n_input;i++){
+			for(int r=0;r<nrow_conv;r++){
+				for(int c=0;c<ncol_conv;c++){
+					weights[i][r][c] = (drand48()*2-1)/10;
+				}
+			}
+		}
+
+	}
+
+	void backward(){
+
+		/*
+		double cvalue = output[0][0];
+		// groundtruth
+		// std::cout << "CURRENT " << cvalue << "    GT " << groundtruth << std::endl;
+
+		for(int i_input=0;i_input<n_input;i_input++){
+
+			double w = weights[i_input][0][0];
+			double x = inputs[i_input][0][0];
+
+			double grad_w = 4.0*(cvalue-groundtruth)*(x-w);
+			double grad_x = -4.0*(cvalue-groundtruth)*(x-w);
+
+			//std::cout << groundtruth << "  " <<  "WEIGHT " << weights[i_input][0][0];
+			weights[i_input][0][0] = 
+				weights[i_input][0][0] + STEPSIZE * grad_w;
+			//std::cout << "   -> " << weights[i_input][0][0] << std::endl;
+
+			grads[i_input][0][0] += grad_x;
+
+			//std::cout << groundtruth << "   " << grad_x << std::endl;
+
+		}
+		*/
+	}
+
+	void forward(){
+
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+				double sum = 0.0;
+				for(int i_input=0;i_input<n_input;i_input++){
+					for(int ir=r;ir<r+nrow_conv;ir++){
+						for(int ic=c;ic<c+ncol_conv;ic++){
+							sum += (weights[i_input][ir-r][ic-c] - inputs[i_input][ir][ic])
+									*(weights[i_input][ir-r][ic-c] - inputs[i_input][ir][ic]);
+						}
+					}
+				}
+				output[r][c] = sum;
+			}
+		}
+		
+		//std::cout << "-------LR-------" << std::endl;
+		//for(int r=0;r<nrow_output;r++){
+		//	for(int c=0;c<ncol_output;c++){
+		//		std::cout << output[r][c] << " ";
+		//	}
+		//	std::cout << std::endl;
+		//}
+		
+	}
+
+};
+
+class LogisticOperation : public Operation{
+public:
+
+	int n_input;
+
+	void clear_grad(){
+		//for(int r=0;r<nrow_output;r++){
+		//	for(int c=0;c<ncol_output;c++){
+		//		grad[r][c] = 0;
+		//	}
+		//}
+		for(int i_input=0;i_input<n_input;i_input++){
+			for(int ir=0;ir<nrow_input;ir++){
+				for(int ic=0;ic<ncol_input;ic++){
+					grads[i_input][ir][ic] = 0.0;
+				}
+			}
+		}
+	}
+
+	LogisticOperation(int _n_input, int nrow_output, int ncol_output, int nrow_input, int ncol_input):
+		Operation(nrow_output, ncol_output, nrow_input, ncol_input){
+	
+		n_input = _n_input;
+
+		// init weights
+		for(int i=0;i<n_input;i++){
+			for(int r=0;r<nrow_conv;r++){
+				for(int c=0;c<ncol_conv;c++){
+					weights[i][r][c] = (drand48()*2-1)/10;
+				}
+			}
+		}
+
+	}
+
+	void backward(){
+
+		/*
+		double cvalue = output[0][0];
+
+		for(int i_input=0;i_input<n_input;i_input++){
+
+			double w = weights[i_input][0][0];
+			double x = inputs[i_input][0][0];
+
+			double grad_w = x*groundtruth - cvalue*x;
+			double grad_x = w*groundtruth - cvalue*w;
+
+			weights[i_input][0][0] = 
+				weights[i_input][0][0] + STEPSIZE * grad_w;
+
+			grads[i_input][0][0] += grad_x;
+
+		}
+		*/
+	}
+
+	void forward(){
+
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+				double sum = 0.0;
+				for(int i_input=0;i_input<n_input;i_input++){
+					for(int ir=r;ir<r+nrow_conv;ir++){
+						for(int ic=c;ic<c+ncol_conv;ic++){
+							sum += weights[i_input][ir-r][ic-c] * inputs[i_input][ir][ic];
+						}
+					}
+				}
+				output[r][c] = 1.0/(1.0+exp(-sum));
+			}
+		}
+		
+		//std::cout << "-------LR-------" << std::endl;
+		//for(int r=0;r<nrow_output;r++){
+		//	for(int c=0;c<ncol_output;c++){
+		//		std::cout << output[r][c] << " ";
+		//	}
+		//	std::cout << std::endl;
+		//}
+		
+	}
+
+};
+
