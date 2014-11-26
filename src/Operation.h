@@ -184,6 +184,7 @@ public:
 
 	void forward(){
 
+		/*
 		for(int r=0;r<nrow_output;r++){
 			for(int c=0;c<ncol_output;c++){
 				double sum = 0.0;
@@ -198,6 +199,50 @@ public:
 				output[r][c] = tanh(sum);
 			}
 		}
+		*/
+
+		/*
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+				output[r][c] = 0.0;
+			}
+		}
+		*/
+
+		/*
+		for(int i_input=0;i_input<n_input;i_input++){
+			double ** const pweight = weights[i_input];
+			double ** const pinputs = inputs[i_input];
+			
+			for(int r=0;r<nrow_output;r++){
+				for(int c=0;c<ncol_output;c++){
+					for(int ir=r;ir<r+nrow_conv;ir++){
+						for(int ic=c;ic<c+ncol_conv;ic++){
+							output[r][c] += pweight[ir-r][ic-c] * pinputs[ir][ic];
+						}
+					}
+				}
+			}
+		}
+		*/
+		
+		/*
+		for(int r=0;r<nrow_output;r++){
+			for(int c=0;c<ncol_output;c++){
+				output[r][c] = tanh(output[r][c]);
+			}
+		}
+		*/
+
+		/*
+		const int nele = nrow_input * ncol_input;
+		const double * const pstart = &inputs[0][0][0];
+		double sum = 0.0;
+		for(int i=0;i<nele;i++){
+			sum += pstart[i];
+		}
+		output[0][0] = sum;
+		*/
 
 		/*
 		std::cout << "-------FULL-------" << std::endl;

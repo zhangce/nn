@@ -17,7 +17,7 @@ public:
 
 	void forward(){
 		for(int i_operation=0;i_operation<n_operations;i_operation++){
-			Operation * operation = operations[i_operation];
+			Operation * const operation = operations[i_operation];
 			operation->forward();
 		}
 	}
@@ -52,7 +52,7 @@ public:
 
 	void forward(){
 		for(int i_layer=0; i_layer<n_layer; i_layer++){
-			Layer * layer = layers[i_layer];
+			Layer * const layer = layers[i_layer];
 			layer->forward();
 		}
 	}

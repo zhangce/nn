@@ -13,18 +13,60 @@ int DIGIT=10;
 int main(int argc, char ** argv){
 
 	MNISTCorpus corpus("input/train-labels-idx1-ubyte", "input/train-images-idx3-ubyte");
-	MNISTCorpus corpus_test("input/t10k-labels-idx1-ubyte", "input/t10k-images-idx3-ubyte");
-
-	/*
-	for(int i=0;i<corpus.n_image;i++){
-		corpus.images[i]->show();
-		std::cout << "-------------------------" << std::endl;
-	}
-	*/
 
 	// Build Network
 
-	//corpus.n_image = 1000;
+	Network network(1);
+	network.layers[0] = new Layer(6);
+	Layer * layer1 = network.layers[0];
+	for(int i=0;i<6;i++){
+		layer1->operations[i]
+			= (Operation*) new FullyConnectedOperation(1, 24, 24, corpus.n_rows, corpus.n_cols);
+		layer1->operations[i]->inputs[0] = corpus.images[0]->pixels;
+		layer1->operations[i]->grads[0] = NULL;
+	}
+
+	for(int i_epoch=0;i_epoch<100000;i_epoch++){
+		int ncorr[10];
+		int ncorr_neg[10];
+		int npos[10];
+		int nneg[10];
+		for(int i=0;i<10;i++){
+			ncorr[i] = 0;
+			ncorr_neg[i] = 0;
+			npos[i] = 0;
+			nneg[i] = 0;
+		}
+		double loss = 0.0;
+		double loss_test = 0.0;
+
+		Timer t;
+		for(int i_img=0;i_img<corpus.n_image;i_img++){
+			for(int i=0;i<4;i++){
+				layer1->operations[i]->inputs[0] 
+					= corpus.images[i_img]->pixels;
+			}
+			network.forward();
+		}
+		double trainingtime = t.elapsed();
+		std::cout << "Training " << trainingtime << " seconds..." << "  " <<
+			(trainingtime/corpus.n_image) << " seconds/image." << std::endl;
+		double throughput = 1.0*corpus.n_rows*corpus.n_cols*sizeof(double)*corpus.n_image/1024/1024/trainingtime;
+		std::cout << "     THROUGHPUT = " << throughput << "MB/seconds..." << std::endl;
+	}
+
+	std::cout << "DONE" << std::endl;
+
+	return 0;
+}
+
+
+void LeNet5(){
+
+	MNISTCorpus corpus("input/train-labels-idx1-ubyte", "input/train-images-idx3-ubyte");
+	MNISTCorpus corpus_test("input/t10k-labels-idx1-ubyte", "input/t10k-images-idx3-ubyte");
+
+	// Build Network
 
 	Network network(6);
 	network.layers[0] = new Layer(6);
@@ -103,6 +145,7 @@ int main(int argc, char ** argv){
 		double loss_test = 0.0;
 
 		Timer t;
+		
 		for(int i_img=0;i_img<corpus.n_image;i_img++){
 
 			layer6->operations[0]->groundtruth 
@@ -113,7 +156,7 @@ int main(int argc, char ** argv){
 			}
 
 			network.forward();
-			network.backward();	
+			//network.backward();	
 		}
 		double trainingtime = t.elapsed();
 		std::cout << "Training " << trainingtime << " seconds..." << "  " <<
@@ -159,8 +202,8 @@ int main(int argc, char ** argv){
 
 	std::cout << "DONE" << std::endl;
 
-	return 0;
 }
+
 
 
 	/*

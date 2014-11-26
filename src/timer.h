@@ -44,7 +44,7 @@ public:
         clock_gettime(CLOCK_MONOTONIC, &_start);
     }
     
-    inline float elapsed(){
+    inline double elapsed(){
         clock_gettime(CLOCK_MONOTONIC, &_end);
         return (_end.tv_sec - _start.tv_sec) + (_end.tv_nsec - _start.tv_nsec) / 1000000000.0;
     }
